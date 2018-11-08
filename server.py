@@ -12,10 +12,11 @@ import pandas as pd
 
 
 
-def addLection(nameOfLection,textOfLection, question1,question2,question3,question4):
-    
+def addLection(nameOfLection,textOfLection, question1,question2,question3,question4,conn):
 
     pass
+
+
 def checkLogAndPassword(login, password,connection,conn):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM authData WHERE Login=?", (login,))
@@ -27,9 +28,10 @@ def checkLogAndPassword(login, password,connection,conn):
         #TODO Отправить неверный логин и возможность восстановить его
         #connection.sendall("--pass_incorrect--".encode("utf8"))
     else:
-        if rows[1] == password:
+        print(rows[0][1])
+        if rows[0][1] == password:
             print('Пароль верен')
-            if rows[2] == 1:
+            if rows[0][2] == 1:
                 connection.sendall("--accepted_teacher--".encode("utf8"))
             else:
                 connection.sendall("--accepted_student--".encode("utf8"))
@@ -182,7 +184,7 @@ def client_thread(connection, ip, port,adress , max_buffer_size = 80000):
             print("--------------ADDING NEW LECTION--------------")
             textAndQuestions = client_input[15:].split('!=,/ds')
 
-            addLection(textAndQuestions[0],textAndQuestions[1],textAndQuestions[2],textAndQuestions[3],textAndQuestions[4],textAndQuestions[5])
+            addLection(textAndQuestions[0],textAndQuestions[1],textAndQuestions[2],textAndQuestions[3],textAndQuestions[4],textAndQuestions[5],conn)
 
             print(textAndQuestions)
         else:
