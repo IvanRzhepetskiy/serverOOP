@@ -1,0 +1,7 @@
+Login password 1
+Login1 password 0
+Login2 password 1
+teacher teachPass 1
+Teacher teach1 1
+kun password 1
+123123 123123 1
