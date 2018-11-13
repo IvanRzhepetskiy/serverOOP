@@ -6,14 +6,56 @@ from threading import *
 names_adresses = {}    #dict of names and adresses
 #states = {}  #dict for states and adresses
 clients=[]
-data=[]
+
 connections = list()
 import pandas as pd
 
+def addMarkToDB(name_of_lection,connection,conn):
 
+    pass
+def sendExactLection(name_of_lection,mark,connection,conn):
+    print(name_of_lection)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Lections WHERE Name =?",(name_of_lection,))
+    rows = cursor.fetchall()
+    stringToSend = ''
+    if len(rows[0][2])!= 0:
+        print(rows[0][1])
+        for data in rows[0]:
+            stringToSend += str(data) + '!=,/ds'
+    connection.sendall(("--lection_ready--" + stringToSend).encode("utf8"))
 
-def addLection(nameOfLection,textOfLection, question1,question2,question3,question4,conn):
+    pass
+def sendLections(connection,conn):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Lections")
+    rows = cursor.fetchall()
+    stringToSend = ''
+    for row in rows:
+        stringToSend+=str(row[0])+'!=,/ds'
+    connection.sendall(("--lections--"+stringToSend).encode("utf8"))
 
+    pass
+
+def addLection(data_list,conn):
+    cursor = conn.cursor()
+    print(len(data_list))
+    if len(data_list) == 5:
+        cursor.execute("INSERT INTO Lections VALUES (?,?,?,?,?,?,?,?,?,?,?)", (data_list[0], data_list[1],data_list[2],data_list[3],None,None,None,None,None,None,None))
+        conn.commit()
+        print("Added Lection")
+    elif len(data_list) == 7:
+        cursor.execute("INSERT INTO Lections VALUES (?,?,?,?,?,?,?,?,?,?,?)", (data_list[0], data_list[1],data_list[2],data_list[3],data_list[4],data_list[5],None,None,None,None,None))
+        conn.commit()
+        print("Added Lection")
+    elif len(data_list) == 9:
+        cursor.execute("INSERT INTO Lections VALUES (?,?,?,?,?,?,?,?,?,?,?)", (data_list[0], data_list[1],data_list[2],data_list[3],data_list[4],data_list[5],data_list[6],data_list[7],None,None,None))
+        conn.commit()
+        print("Added Lection")
+    elif len(data_list) == 11:
+        cursor.execute("INSERT INTO Lections VALUES (?,?,?,?,?,?,?,?,?,?,?)", (data_list[0], data_list[1],data_list[2],data_list[3],data_list[4],data_list[5],data_list[6],data_list[7],data_list[8],data_list[9]))
+        conn.commit()
+        print("Added Lection")
     pass
 
 
@@ -37,25 +79,7 @@ def checkLogAndPassword(login, password,connection,conn):
                 connection.sendall("--accepted_student--".encode("utf8"))
         else:
             connection.sendall("--pass_incorrect--".encode("utf8"))
-    """
-    print(data)
-    # Сначала ищем логин в списке
-    for dat in data:
-        if dat[0] == login:
-            if dat[1]==password:
-                print("Все ок, пусть заходит")
-                if dat[2]==str('1'):
-                    connection.sendall("--accepted_teacher--".encode("utf8"))
-                else:
-                    connection.sendall("--accepted_student--".encode("utf8"))
-                break
-            else:
-                print("Взлом не пройдет")
-                connection.sendall("--pass_incorrect--".encode("utf8"))
 
-                break
-        print("Взлом не пройдет")
-        """
     pass
 
 def registerNewUser(name,login,password,isTeacher,connection,conn):
@@ -73,27 +97,9 @@ def registerNewUser(name,login,password,isTeacher,connection,conn):
         print('Логин существует')
         connection.sendall("--login_exists--".encode('utf-8'))
     conn.commit()
-    """
 
-    isIn = False
-    for dat in data:
-        if dat[0] == login:
-            isIn = True
-    if isIn:
-        print("Логин уже существует")
-        connection.sendall("--login_exists--".encode('utf-8'))
-    else:
-        data.append([login,password])
-        f = open("data.txt", "a+")
-        f.write("%s %s %s\n" % (login,password,isTeacher))
-        f.close()
-        print(data)
 
-        if isTeacher == str('1'):
-            connection.sendall("--accepted_teacher--".encode("utf8"))
-        else:
-            connection.sendall("--accepted_student--".encode("utf8"))
-    """
+
     pass
 
 def main():
@@ -103,10 +109,8 @@ def main():
 
 
 def start_server():
-    host = "192.168.1.101"
+    host = "localhost"
     port = 8889     # arbitrary non-privileged port
-
-    global data
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)   # SO_REUSEADDR flag tells the kernel to reuse a local socket in TIME_WAIT state, without waiting for its natural timeout to expire
     print("Socket created")
@@ -117,16 +121,8 @@ def start_server():
         print("Bind failed. Error : " + str(sys.exc_info()))
         sys.exit()
 
-    soc.listen(15)       # queue up to 5 requests
+    soc.listen(15)       # queue up to 15 requests
     print("Socket now listening")
-    # При перезапуске сервера мы считываем данные из нашего файла
-    with open(r"C:\Users\Ivan\PycharmProjects\serverOOP\data.txt") as f:
-        data = f.read().splitlines()
-    i = 0
-    for line in data:
-        data[i] = line.split(" ")
-        i = i + 1
-    f.close()
 
     # infinite loop- do not reset for every requests
     while True:
@@ -138,7 +134,6 @@ def start_server():
         ip, port = str(address[0]), str(address[1])
         print("Connected with " + ip + ":" + port)
         clients.append(address)
-
 
 
         try:
@@ -160,6 +155,9 @@ def client_thread(connection, ip, port,adress , max_buffer_size = 80000):
         CONNECTstring = '--connect--'
         REGISTERstring = '--register--'
         ADDLECTIONstring = '--add_lection--'
+        GETLECTIONstring = '--get_lections--'
+        GETEXACTLECTONstring = '--get_exact_lection--'
+        ADDMARKstring = '--add_mark--'
         if client_input.find(CONNECTstring) == 0:
             print("--------------NEW TRY--------------")
             print(client_input[11:])
@@ -177,16 +175,28 @@ def client_thread(connection, ip, port,adress , max_buffer_size = 80000):
             print("--------------CONNECTION CLOSED--------------")
             connection.sendall("--changeFlag--".encode("utf8"))
             connection.close()
-
             print("Connection " + ip + ":" + port + " closed")
             is_active = False
+
         elif client_input.find(ADDLECTIONstring) == 0:
             print("--------------ADDING NEW LECTION--------------")
             textAndQuestions = client_input[15:].split('!=,/ds')
-
-            addLection(textAndQuestions[0],textAndQuestions[1],textAndQuestions[2],textAndQuestions[3],textAndQuestions[4],textAndQuestions[5],conn)
+            print(textAndQuestions)
+            addLection(textAndQuestions,conn)
 
             print(textAndQuestions)
+        elif client_input.find(GETLECTIONstring) == 0:
+            print("--------------READY TO SEND NEW LECTION--------------")
+            sendLections(connection,conn)
+        elif client_input.find(GETEXACTLECTONstring) == 0:
+            print('---------------FINDING EXACT LECTION-----------------')
+            lectionName = client_input[21:]
+            sendExactLection(lectionName,connection,conn)
+        elif client_input.find(ADDMARKstring) == 0:
+            print('---------------ADDING NEW MARK-----------------')
+            name_and_mark = client_input[12:].split('!=,/ds')
+            addMarkToDB(name_and_mark[0],name_and_mark[1],connection,conn)
+
         else:
             print("Processed result: {}".format(client_input))
             connection.sendall("r-".encode("utf8"))

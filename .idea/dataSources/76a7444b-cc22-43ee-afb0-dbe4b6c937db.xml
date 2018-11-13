@@ -11,43 +11,97 @@
     <collation id="3" parent="1" name="BINARY"/>
     <collation id="4" parent="1" name="NOCASE"/>
     <collation id="5" parent="1" name="RTRIM"/>
-    <table id="6" parent="2" name="authData"/>
-    <table id="7" parent="2" name="sqlite_master">
+    <table id="6" parent="2" name="Lections"/>
+    <table id="7" parent="2" name="Marks"/>
+    <table id="8" parent="2" name="authData"/>
+    <table id="9" parent="2" name="sqlite_master">
       <System>1</System>
     </table>
-    <column id="8" parent="6" name="Login">
+    <column id="10" parent="6" name="Name">
       <Position>1</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="9" parent="6" name="Password">
+    <column id="11" parent="6" name="Text">
       <Position>2</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="10" parent="6" name="isTeacher">
+    <column id="12" parent="6" name="Question1">
+      <Position>3</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="13" parent="6" name="Answer1">
+      <Position>4</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="14" parent="6" name="Question2">
+      <Position>5</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="15" parent="6" name="Answer2">
+      <Position>6</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="16" parent="6" name="Question3">
+      <Position>7</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="17" parent="6" name="Answer3">
+      <Position>8</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="18" parent="6" name="Question4">
+      <Position>9</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="19" parent="6" name="Answer4">
+      <Position>10</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="20" parent="6" name="Creator">
+      <Position>11</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="21" parent="7" name="Subject_name">
+      <Position>1</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="22" parent="7" name="Mark">
+      <Position>2</Position>
+      <DataType>REAL|0s</DataType>
+    </column>
+    <column id="23" parent="8" name="Login">
+      <Position>1</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="24" parent="8" name="Password">
+      <Position>2</Position>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="25" parent="8" name="isTeacher">
       <Position>3</Position>
       <DataType>integer|0s</DataType>
     </column>
-    <column id="11" parent="6" name="Name">
+    <column id="26" parent="8" name="Name">
       <Position>4</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="12" parent="7" name="type">
+    <column id="27" parent="9" name="type">
       <Position>1</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="13" parent="7" name="name">
+    <column id="28" parent="9" name="name">
       <Position>2</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="14" parent="7" name="tbl_name">
+    <column id="29" parent="9" name="tbl_name">
       <Position>3</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="15" parent="7" name="rootpage">
+    <column id="30" parent="9" name="rootpage">
       <Position>4</Position>
       <DataType>int|0s</DataType>
     </column>
-    <column id="16" parent="7" name="sql">
+    <column id="31" parent="9" name="sql">
       <Position>5</Position>
       <DataType>text|0s</DataType>
     </column>
