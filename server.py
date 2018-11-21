@@ -10,10 +10,31 @@ clients=[]
 connections = list()
 import pandas as pd
 
-def addMarkToDB(name_of_lection,connection,conn):
 
+def sendMarks(login,connection,conn):
+    string_to_send = ''
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Marks WHERE Student_login=?",(login,))
+    rows = cursor.fetchall()
+    for data in rows:
+        string_to_send +=( str(data[0])+ '!=,/ds'+ str(data[1])+ '!=,/ds' )
+    conn.commit()
+    connection.sendall(("--marks_ready--" + string_to_send).encode())
+    print('----MARKS READY--')
+    print(string_to_send)
     pass
-def sendExactLection(name_of_lection,mark,connection,conn):
+def addMarkToDB(name_of_lection,mark,login,connection,conn):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Marks WHERE Student_login=? AND Lection_name =?", (login,name_of_lection))
+    rows = cursor.fetchall()
+    if not rows:
+        cursor.execute("INSERT INTO Marks VALUES (?,?,?)",
+                       (name_of_lection,float(mark),login))
+    else:
+        print('Оченка уже есть')
+    conn.commit()
+    pass
+def sendExactLection(name_of_lection,connection,conn):
     print(name_of_lection)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Lections WHERE Name =?",(name_of_lection,))
@@ -30,9 +51,18 @@ def sendLections(connection,conn):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Lections")
     rows = cursor.fetchall()
+    cursor.execute("SELECT * FROM Marks")
+    rows1 = cursor.fetchall()
+    isIn = False
     stringToSend = ''
     for row in rows:
-        stringToSend+=str(row[0])+'!=,/ds'
+        for rowMarks in rows1:
+            if row[0] == rowMarks[0]:
+                isIn = True
+        if not isIn:
+            stringToSend+=str(row[0])+'!=,/ds'
+            isIn = False
+
     connection.sendall(("--lections--"+stringToSend).encode("utf8"))
 
     pass
@@ -53,7 +83,7 @@ def addLection(data_list,conn):
         conn.commit()
         print("Added Lection")
     elif len(data_list) == 11:
-        cursor.execute("INSERT INTO Lections VALUES (?,?,?,?,?,?,?,?,?,?,?)", (data_list[0], data_list[1],data_list[2],data_list[3],data_list[4],data_list[5],data_list[6],data_list[7],data_list[8],data_list[9]))
+        cursor.execute("INSERT INTO Lections VALUES (?,?,?,?,?,?,?,?,?,?,?)", (data_list[0], data_list[1],data_list[2],data_list[3],data_list[4],data_list[5],data_list[6],data_list[7],data_list[8],data_list[9],data_list[10]))
         conn.commit()
         print("Added Lection")
     pass
@@ -110,7 +140,7 @@ def main():
 
 def start_server():
     host = "localhost"
-    port = 8889     # arbitrary non-privileged port
+    port = 8888     # arbitrary non-privileged port
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)   # SO_REUSEADDR flag tells the kernel to reuse a local socket in TIME_WAIT state, without waiting for its natural timeout to expire
     print("Socket created")
@@ -158,6 +188,7 @@ def client_thread(connection, ip, port,adress , max_buffer_size = 80000):
         GETLECTIONstring = '--get_lections--'
         GETEXACTLECTONstring = '--get_exact_lection--'
         ADDMARKstring = '--add_mark--'
+        GETMARKSstring = '--get_marks--'
         if client_input.find(CONNECTstring) == 0:
             print("--------------NEW TRY--------------")
             print(client_input[11:])
@@ -195,8 +226,12 @@ def client_thread(connection, ip, port,adress , max_buffer_size = 80000):
         elif client_input.find(ADDMARKstring) == 0:
             print('---------------ADDING NEW MARK-----------------')
             name_and_mark = client_input[12:].split('!=,/ds')
-            addMarkToDB(name_and_mark[0],name_and_mark[1],connection,conn)
-
+            addMarkToDB(name_and_mark[0],name_and_mark[1],name_and_mark[2],connection,conn)
+        elif client_input.find(GETMARKSstring) == 0:
+            print('----------------SENDING MARKS--------------------------')
+            login = client_input[13:]
+            print(login)
+            sendMarks(login,connection,conn)
         else:
             print("Processed result: {}".format(client_input))
             connection.sendall("r-".encode("utf8"))
